@@ -62,7 +62,7 @@ class ApplicationWindow(QtWidgets.QMainWindow):
 
         #Creating sidebar icons
         self.sidebar_task = QtWidgets.QPushButton()
-        self.sidebar_task.setIcon(QIcon('C:/Users/hp/Desktop/Image Processing/Image Viewer/Image Viewer/Sidebar_Icons/tasks.png'))
+        self.sidebar_task.setIcon(QIcon('Sidebar_Icons/tasks.png'))
         self.sidebar_task.clicked.connect(lambda: self.OpenTaskBar())
         self.sidebar_task.setStyleSheet(" QPushButton { border: none; }")
         self.sidebar_task.setCheckable(True)

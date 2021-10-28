@@ -1,26 +1,22 @@
-from PIL.ImageQt import ImageQt
 from PyQt5 import QtWidgets
-from PyQt5.QtWidgets import QLabel, QWidget
-from PyQt5.QtGui import QPixmap, QPainter
-from PyQt5.QtCore import QRect
-import numpy as np
+from PyQt5.QtWidgets import QWidget
 import pydicom as dicom
 from os import stat
-from PIL.Image import fromarray, open
+from PIL.Image import open
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg
 from matplotlib.figure import Figure
-# from DicomToPIL import get_PIL_image, show_PIL
 
 class MplCanvas(FigureCanvasQTAgg):
 
     def __init__(self, parent=None, width=5, height=4, dpi=100):
-        fig = Figure(figsize=(width, height), dpi=dpi)
+        fig = Figure(figsize=(width, height), dpi=dpi, facecolor='#1e1e1e')
         self.axes = fig.add_subplot(111)
+        self.axes.axis('off')
         super(MplCanvas, self).__init__(fig)
 
 class ImageDisplay(QtWidgets.QGridLayout):
-    def __init__(self, parent=None):
-        QWidget.__init__(self, parent=parent)
+    def __init__(self):
+        QWidget.__init__(self)
         self.ImageDisplayer = MplCanvas(self, width=5, height=4, dpi=100)
         self.addWidget(self.ImageDisplayer)
         self.path = ''
@@ -35,6 +31,8 @@ class ImageDisplay(QtWidgets.QGridLayout):
         'PatientName': '',
         'PatientAge': '',
         'BodyPartExamined': ''}
+
+        self.MessageBox = QtWidgets.QMessageBox(QtWidgets.QMessageBox.Warning, "Error", "Error")
 
     def SetPath(self, path):
         """Sets the path of the image and generates the information and puts it in a dictionary called Info
@@ -69,19 +67,14 @@ class ImageDisplay(QtWidgets.QGridLayout):
         """
         self.path = path
         self.DicomImage = dicom.dcmread(path)
-        # show_PIL(self.DicomImage)
-        # pil_image = get_PIL_image(self.DicomImage)
         self.CheckDicomData('PatientName')
         self.CheckDicomData('PatientAge')
         self.CheckDicomData('Modality')
         self.CheckDicomData('BodyPartExamined')
 
         PixelArray = self.DicomImage.pixel_array
-        self.ImageDisplayer.axes.imshow(PixelArray)
+        self.ImageDisplayer.axes.imshow(PixelArray, cmap='gray')
 
-        # image = fromarray(PixelArray.astype(np.int8), 'P')
-        # image = ImageQt(image)
-        # self.ImageDisplayer = QPixmap.fromImage(image)
         self.Info['width'] = PixelArray.shape[0]
         self.Info['height'] = PixelArray.shape[1]
         self.Info['size'] = stat(self.path).st_size
@@ -137,31 +130,14 @@ Body Part Examined: {}".format(self.DicomInfo['PatientName'],
         self.ImageDisplayer.axes.imshow(Array)
         self.update()
 
-    # def paintEvent(self, event):
-    #     if not self.ImageDisplayer.isNull():
-    #         height = 0
-    #         width = 0
-    #         painter = QPainter(self)
-    #         painter.setRenderHint(QPainter.SmoothPixmapTransform)
-    #         canvas_width = event.rect().width()
-    #         canvas_height = event.rect().height()
-    #         image_width = self.ImageDisplayer.width()
-    #         image_height = self.ImageDisplayer.height()
-    #         Scaled_width = (canvas_height*image_width)/image_height
-    #         Scaled_height = (canvas_width*image_height)/image_width
 
-    #         new_width = 0
-    #         new_height = 0
+    def DisplayError(self, title, Message):
+        """Creates a messsage box when and error happens
 
-    #         if Scaled_width < canvas_width:
-    #             new_height = canvas_height
-    #             new_width = Scaled_width
-    #         else:
-    #             new_height = Scaled_height
-    #             new_width = canvas_width
-            
-    #         HeightShift = (event.rect().height()/2) - (new_height/2)
-    #         widthtShift = (event.rect().width()/2) - (new_width/2)
-    #         painter.drawPixmap(QRect(widthtShift, HeightShift,new_width, new_height), self.ImageDisplayer)
-    
-    
+        Args:
+            title (str): title of the error message
+            Message (str): information about the error to be displayed
+        """
+        self.MessageBox.setWindowTitle(title)
+        self.MessageBox.setText(Message)
+        self.MessageBox.exec()

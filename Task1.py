@@ -2,7 +2,8 @@ from PyQt5.QtWidgets import QGridLayout, QSpacerItem, QWidget
 from PyQt5 import QtWidgets
 from PyQt5.QtGui import QFont, QIcon
 from PyQt5 import QtCore
-from ImageDisplayer import ImageDisplay
+# from ImageDisplayer import ImageDisplay
+from ImageDisplayerMatplot import ImageDisplay
 import os
 
 TEXT_COLOR = "color: #BCBCBC;"
@@ -60,7 +61,7 @@ class Task1(QWidget):
         self.layout_browse.addWidget(self.browse_label)
         self.layout_browse.addWidget(self.browse_text)
         self.layout_browse.addWidget(self.browse_button)
-        self.layout_image.addWidget(self.image,0,0)
+        self.layout_image.addLayout(self.image,0,0)
         self.layout_image.addLayout(self.layout_browse,1,0)
         self.layout_main.addLayout(self.layout_image,0,0)
         
@@ -73,8 +74,6 @@ class Task1(QWidget):
         self.layout_main.addWidget(self.details_label,0,2)
         self.layout_main.setColumnStretch(0,4)
         self.layout_main.setColumnStretch(2,1)
-
-        self.MessageBox = QtWidgets.QMessageBox(QtWidgets.QMessageBox.Warning, "Error", "Error")
 
     def BrowseClicked(self):
         """saves the image from path and creates the image info string
@@ -91,7 +90,7 @@ class Task1(QWidget):
                 self.image.SetPath(Imagepath[0])
             self.details_label.setText(self.image.LabelData())
         except:
-            self.DisplayError("Corrupted File", "This file is corrupted")
+            self.image.DisplayError("Corrupted File", "This file is corrupted")
     
     def open_dialog_box(self):
         """Creates a diaglog box for the user to select file and check if it's an image
@@ -109,20 +108,8 @@ class Task1(QWidget):
         if Imagepath[1].lower() in FileTypes:
             return [filename[0], Imagepath[1].lower()]
         else:
-            self.DisplayError('file type error', 'please select a JPEG or BMP or DICOM')
+            self.image.DisplayError('file type error', 'please select a JPEG or BMP or DICOM')
             return self.open_dialog_box()
-            
-
-    def DisplayError(self, title, Message):
-        """Creates a messsage box when and error happens
-
-        Args:
-            title (str): title of the error message
-            Message (str): information about the error to be displayed
-        """
-        self.MessageBox.setWindowTitle(title)
-        self.MessageBox.setText(Message)
-        self.MessageBox.exec()
 
     def DeleteWidget(self):
         """Destructs the widget
