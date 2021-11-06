@@ -1,12 +1,10 @@
 from PyQt5 import QtCore, QtWidgets
 from PyQt5.QtGui import QFont, QIcon
-import numpy as np
-import os
-from ImageDisplayer import ImageDisplay
 from Task1 import Task1
 from Task2 import Task2
+from Task3 import Task3
 
-NO_OF_TASKS = 2
+NO_OF_TASKS = 3
 TEXT_COLOR = "color: #BCBCBC;"
 
 PUSH_BUTTON_STYLE = """QPushButton {
@@ -150,7 +148,9 @@ class ApplicationWindow(QtWidgets.QMainWindow):
         elif index==1:
             self.OpenedTask = Task2()
             self.layout_Task.addWidget(self.OpenedTask)
-            
+        elif index==2:
+            self.OpenedTask = Task3()
+            self.layout_Task.addWidget(self.OpenedTask)
     
     def InitialLabel(self):
         """Creates the initial label that say "Please Select A Task" when no task is selected

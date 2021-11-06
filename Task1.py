@@ -1,8 +1,8 @@
-from PyQt5.QtWidgets import QGridLayout, QSpacerItem, QWidget
+from PyQt5.QtWidgets import QGridLayout, QWidget
 from PyQt5 import QtWidgets
-from PyQt5.QtGui import QFont, QIcon
+from PyQt5.QtGui import QFont
 from PyQt5 import QtCore
-# from ImageDisplayer import ImageDisplay
+from Helpers import BrowseWidget
 from ImageDisplayerMatplot import ImageDisplay
 import os
 
@@ -39,30 +39,21 @@ class Task1(QWidget):
 
         self.layout_image = QtWidgets.QGridLayout()
         self.layout_image.setContentsMargins(15,15,15,15)
-        self.layout_browse = QtWidgets.QHBoxLayout()
-        self.browse_label = QtWidgets.QLabel()
-        self.browse_label = QtWidgets.QLabel("Open: ")
-        self.browse_label.setFont(QFont('impact', 15))
-        self.browse_label.setStyleSheet(TEXT_COLOR)
-
-        self.browse_text = QtWidgets.QLineEdit()
-        self.browse_text.setStyleSheet(TEXT_COLOR)
-        self.browse_button = QtWidgets.QPushButton('Browse')
-        self.browse_button.setStyleSheet(PUSH_BUTTON_STYLE)
-
-        self.browse_button.clicked.connect(lambda: self.BrowseClicked())
+        self.Browse = BrowseWidget()
+        self.Browse.browse_button.clicked.connect(lambda: self.BrowseClicked())
+        
         self.image= ImageDisplay()
+        self.ScrollArea = QtWidgets.QScrollArea()
+        self.ScrollArea.setWidget(self.image)
 
         self.details_label = QtWidgets.QLabel()
         self.details_label.setFont(QFont('default', 13))
         self.details_label.setAlignment(QtCore.Qt.AlignTop)
         self.details_label.setContentsMargins(15,15,15,15)
         self.details_label.setStyleSheet(TEXT_COLOR)
-        self.layout_browse.addWidget(self.browse_label)
-        self.layout_browse.addWidget(self.browse_text)
-        self.layout_browse.addWidget(self.browse_button)
-        self.layout_image.addLayout(self.image,0,0)
-        self.layout_image.addLayout(self.layout_browse,1,0)
+
+        self.layout_image.addWidget(self.ScrollArea,0,0)
+        self.layout_image.addWidget(self.Browse,1,0)
         self.layout_main.addLayout(self.layout_image,0,0)
         
         Separator = QtWidgets.QFrame()
@@ -82,7 +73,8 @@ class Task1(QWidget):
         
         if not Imagepath: 
             return
-        self.browse_text.insert(Imagepath[0])
+        self.Browse.browse_text.insert(Imagepath[0])
+
         try:
             if Imagepath[1] == '.dcm':
                     self.image.SetDicom(Imagepath[0])
@@ -115,8 +107,6 @@ class Task1(QWidget):
         """Destructs the widget
         """
         self.details_label.deleteLater()
-        self.browse_button.deleteLater()
-        self.browse_text.deleteLater()
-        self.layout_browse.deleteLater()
+        self.Browse.deleteLater()
         self.layout_image.deleteLater()
         self.deleteLater()

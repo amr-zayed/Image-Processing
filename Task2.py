@@ -1,7 +1,6 @@
 from PyQt5.QtWidgets import QGridLayout, QHBoxLayout, QPushButton, QWidget
 from PyQt5 import QtWidgets
 import numpy as np
-from PIL import Image
 from ImageDisplayerMatplot import ImageDisplay
 
 PUSH_BUTTON_STYLE = """QPushButton {
@@ -41,9 +40,12 @@ class Task2(QWidget):
         self.ChangePixelsButton = QPushButton('Change Pixel Colors')
         self.ChangePixelsButton.setStyleSheet(PUSH_BUTTON_STYLE)
         self.ChangePixelsButton.clicked.connect(lambda: self.ChangePixels())
+        self.ChangePixelsButton.setDisabled(True)
 
         self.Image=ImageDisplay()
-        self.layout_main.addLayout(self.Image,1,0)
+        self.ScrollArea = QtWidgets.QScrollArea()
+        self.ScrollArea.setWidget(self.Image)
+        self.layout_main.addWidget(self.ScrollArea,1,0)
         self.layout_buttons.addWidget(self.CreateImagebutton)
         self.layout_buttons.addWidget(self.ChangePixelsButton)
 
@@ -52,15 +54,19 @@ class Task2(QWidget):
     def CreateImage(self):
         """creates a white image and shows it in GUI
         """
-        self.PixelArray = np.full((100, 100, 3), 255)        
-        self.Image.ShowArray(self.PixelArray)
+        width = 1080
+        height = 720
+        self.PixelArray = np.full((height, width, 3), 255)       
+        self.Image.ShowArray(np.uint8(self.PixelArray), width=width, height=height)
+        self.ChangePixelsButton.setDisabled(False)
 
     def ChangePixels(self):
         """change the pixels of image"""
         self.PixelArray[2,-4:] = (255,0,0)
         self.PixelArray[-4:,2] = (0,0,255)
 
-        self.Image.ShowArray(self.PixelArray)
+        self.Image.ShowArray(self.PixelArray, width=1080, height=721)
+        self.Image.ShowArray(self.PixelArray, width=1080, height=720)
 
     def DeleteWidget(self):
         """Destructs the widget

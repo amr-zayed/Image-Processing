@@ -1,6 +1,5 @@
 from __future__ import unicode_literals
 import sys
-import os
 from GUI import ApplicationWindow
 from PyQt5.QtWidgets import QApplication
 
