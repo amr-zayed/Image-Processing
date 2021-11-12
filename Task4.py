@@ -70,9 +70,10 @@ class Task4(QtWidgets.QWidget):
                 self.Image.SetPath(Imagepath[0])
         except:
             self.Image.DisplayError("Corrupted File", "This file is corrupted")
+
         self.PixelsArray = self.Image.ToGrayScale(self.Image.PixelArray)
         Rows, Columns = self.PixelsArray.shape
-        self.Image.ShowArray(np.uint8(self.PixelsArray), 'gray', Columns*1.5, Rows*1.5)
+        self.Image.ShowArray(np.uint8(self.PixelsArray), 'gray', Columns, Rows, 0, 255)
         self.HistogramData = self.CalculateHistogram(self.PixelsArray)
         self.PlotHistogram(self.HistogramData, False)
         EqualizedArray = self.HistoEqualization()
@@ -92,7 +93,7 @@ class Task4(QtWidgets.QWidget):
             return False
 
         Imagepath=os.path.splitext(Imagepath)
-        FileTypes = ['.bmp', '.jpeg', '.dcm', '.jpg']
+        FileTypes = ['.bmp', '.jpeg', '.dcm', '.jpg', '.tif']
         if Imagepath[1].lower() in FileTypes:
             return [filename[0], Imagepath[1].lower()]
         else:
@@ -133,7 +134,7 @@ class Task4(QtWidgets.QWidget):
         for i in range(Rows):
             for j in range(Columns):
                 NewArray[i][j] = self.HistogramData[self.PixelsArray[i][j]][2]
-        self.ImageEqualized.ShowArray(np.uint8(NewArray), 'gray', Columns*1.5, Rows*1.5)
+        self.ImageEqualized.ShowArray(np.uint8(NewArray), 'gray', Columns, Rows, 0, 255)
         return NewArray
         
             

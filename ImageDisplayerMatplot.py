@@ -137,26 +137,38 @@ Body Part Examined: {}".format(self.DicomInfo['PatientName'],
 
         return MainData
 
-    def ShowArray(self, Array, color= None, width=None, height=None):
+    def ShowArray(self, Array, color= None, width=None, height=None, VMin = None, VMax = None):
         """Creates a Qpixmap from an array
 
         Args:
             Array (ndarray): array of pixels
             color (str): Color Template
         """
-        
-        self.ImageDisplayer.axes.imshow(Array, cmap=color)
+        self.ImageDisplayer.axes.clear()
+        self.ImageDisplayer.axes.imshow(Array, cmap=color, vmin = VMin, vmax = VMax)
         if width != None and height!= None:
-            self.setFixedWidth(width)
-            self.setFixedHeight(height)
+            if self.height()==height and self.width()==width:
+                self.setFixedWidth(width+1)
+                self.setFixedHeight(height+1)
+            else:
+                self.setFixedWidth(width)
+                self.setFixedHeight(height)
         else:
-            self.setFixedWidth(self.Info['width'])
-            self.setFixedHeight(self.Info['height'])
+            if self.height()==height and self.width()==width:
+                self.setFixedWidth(self.Info['width']+1)
+                self.setFixedHeight(self.Info['height']+1)
+            else:
+                self.setFixedWidth(self.Info['width'])
+                self.setFixedHeight(self.Info['height'])
         self.update()
 
     def PltHistogram(self, keys, values):
+        self.ImageDisplayer.axes.clear()
         self.ImageDisplayer.axes.bar(keys, values)
-        self.setFixedHeight(720)
+        if self.height()==720:
+            self.setFixedHeight(721)
+        else:
+            self.setFixedHeight(720)
         self.ImageDisplayer.axes.axis('on')
 
 
