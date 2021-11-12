@@ -1,5 +1,5 @@
 from PyQt5 import QtCore, QtWidgets
-from PyQt5.QtWidgets import QGridLayout, QHBoxLayout, QLabel, QWidget, QFileDialog
+from PyQt5.QtWidgets import QGridLayout, QHBoxLayout, QWidget, QFileDialog
 from ImageDisplayerMatplot import ImageDisplay
 from Helpers import BrowseWidget
 from PyQt5.QtGui import QDoubleValidator, QFont
@@ -125,7 +125,7 @@ class Task3(QWidget):
             self.ImageNearest.DisplayError("Corrupted File", "This file is corrupted")
         
         self.NearestArray = self.ImageNearest.PixelArray
-        self.NearestArray = self.ToGrayScale(self.NearestArray)
+        self.NearestArray = self.ImageNearest.ToGrayScale(self.NearestArray)
         self.LinearArray = self.NearestArray.copy()
         self.MainArray = self.NearestArray.copy()
 
@@ -134,9 +134,6 @@ class Task3(QWidget):
         self.number_button.setEnabled(True)
         self.number_text.setEnabled(True)
 
-
-        
-    
     def open_dialog_box(self):
         """Creates a diaglog box for the user to select file and check if it's an image
 
@@ -155,24 +152,6 @@ class Task3(QWidget):
         else:
             self.ImageLinear.DisplayError('file type error', 'please select a JPEG or BMP or DICOM')
             return self.open_dialog_box()
-
-    @jit(forceobj=True)
-    def ToGrayScale(self, array):
-        if len(array.shape)!=3:
-            return array
-        
-        rows, columns, _ = array.shape
-        NewArray = np.ndarray((rows, columns))
-        pixelValue = 0
-        array = array/255
-        for i in range(rows):
-            for j in range(columns):
-                pixelValue = 0.2126*array[i][j][0]+0.7152*array[i][j][1]+0.0722*array[i][j][2]
-                NewArray[i][j] = pixelValue/3
-        
-        NewArray = NewArray*255
-
-        return NewArray
 
     def Zoom(self):
         if self.number_text.text()=='' or self.ImageLinear.Info['depth']==1:

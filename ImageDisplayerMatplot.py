@@ -6,7 +6,7 @@ from PIL.Image import open
 import numpy as np
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg
 from matplotlib.figure import Figure
-
+from numba import jit
 
 class MplCanvas(FigureCanvasQTAgg):
 
@@ -154,6 +154,11 @@ Body Part Examined: {}".format(self.DicomInfo['PatientName'],
             self.setFixedHeight(self.Info['height'])
         self.update()
 
+    def PltHistogram(self, keys, values):
+        self.ImageDisplayer.axes.bar(keys, values)
+        self.setFixedHeight(720)
+        self.ImageDisplayer.axes.axis('on')
+
 
     def DisplayError(self, title, Message):
         """Creates a messsage box when and error happens
@@ -165,4 +170,20 @@ Body Part Examined: {}".format(self.DicomInfo['PatientName'],
         self.MessageBox.setWindowTitle(title)
         self.MessageBox.setText(Message)
         self.MessageBox.exec()
+
+    @jit(forceobj=True)
+    def ToGrayScale(self, array):
+        if len(array.shape)!=3:
+            return array
+        
+        rows, columns, _ = array.shape
+        NewArray = np.ndarray((rows, columns))
+        pixelValue = 0
+        array = array/255
+        for i in range(rows):
+            for j in range(columns):
+                pixelValue = 0.2126*array[i][j][0]+0.7152*array[i][j][1]+0.0722*array[i][j][2]
+                NewArray[i][j] = round((pixelValue/3)*255)
+
+        return NewArray
 
