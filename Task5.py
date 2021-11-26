@@ -141,7 +141,7 @@ class Task5(QtWidgets.QWidget):
         if self.size_text.text() != '':
             temp = int(self.size_text.text())
             if temp%2 == 0:
-                self.Image.DisplayError('Data Error', 'Kernel size should be odd number')
+                self.Image.DisplayError('Data Error', 'Kernel size should be odd number and positive')
                 return
             if temp<=0:
                 self.Image.DisplayError('Data Error', 'Kernel size should positive int')
@@ -207,3 +207,5 @@ class Task5(QtWidgets.QWidget):
         self.factor_text.deleteLater()
         self.layout_data_input.deleteLater()
         self.layout_main.deleteLater()
+        self.enhace_button.deleteLater()
+        
