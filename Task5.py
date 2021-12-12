@@ -2,7 +2,7 @@ from PyQt5 import QtWidgets
 from ImageDisplayerMatplot import ImageDisplay
 from PyQt5.QtGui import QDoubleValidator, QFont
 import scipy.signal as sig
-from Helpers import BrowseWidget
+from Helpers import BrowseWidget, Convolotion
 
 import os
 import numpy as np
@@ -152,43 +152,13 @@ class Task5(QtWidgets.QWidget):
             self.factor = int(self.factor_text.text())
         
         Kernel = np.ones((self.size, self.size))
-        convolved_image = self.Convolotion(Kernel, self.PixelsArray, self.size)
-        print(convolved_image)
-        print(convolved_image)
+        convolved_image = Convolotion(Kernel, self.PixelsArray, self.size)
         temp_image = (self.PixelsArray - convolved_image)*self.factor
         temp_image = self.PixelsArray + temp_image
         rows, columns = temp_image.shape
-        self.ImageEnhanced.ShowArray(temp_image, 'gray', rows, columns, self.PixelsArray.min(), self.PixelsArray.max())
+        self.ImageEnhanced.ShowArray(convolved_image, 'gray', rows, columns, self.PixelsArray.min(), self.PixelsArray.max())
 
     
-    def Convolotion(self, arr1, arr2, k_size):
-        padding = int((k_size-1)/2)
-
-        Rows, Columns = arr2.shape
-        Rows, Columns =  Rows+padding, Columns+padding
-        convolved_list = np.zeros((Rows+padding, Columns+padding))
-        for i in range(padding, Rows):
-            for j in range(padding, Columns):
-                convolved_list[i][j] = arr2[i-padding][j-padding]
-
-        # self.ImageEnhanced.ShowArray(convolved_list, 'gray', Rows, Columns, 0, 255)
-        for i in range(padding, Rows):
-            for j in range(padding, Columns):
-                pixels_avg = 0
-                row = i - padding
-                column = j - padding
-                for Ki in range(k_size):
-                    for Kj in range(k_size):
-                        pixels_avg = pixels_avg +  convolved_list[row][column]*arr1[Ki][Kj]
-                        row+=1
-                        column+=1
-                    row = i - padding
-                    column = j - padding
-                    
-                pixels_avg = pixels_avg/(k_size*k_size)
-                convolved_list[i][j]= pixels_avg
-        convolved_list = convolved_list[padding:Rows,padding:Columns]
-        return convolved_list
 
                         
                         

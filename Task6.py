@@ -1,6 +1,6 @@
 from PyQt5 import QtWidgets
 from ImageDisplayerMatplot import ImageDisplay
-from Helpers import BrowseWidget
+from Helpers import BrowseWidget, FourierTransform
 
 import os
 import numpy as np
@@ -84,19 +84,15 @@ class Task6(QtWidgets.QWidget):
         self.Image.ShowArray(self.PixelsArray, 'gray', Columns, Rows, intensity_min, intensity_max)
         self.Transform(self.PixelsArray)
         
-    def Transform(self, arr):
+    def Transform(self, array):
         """Generates the fourier magnitude and phase of the
         array
 
         Args:
             arr (np.ndarray): array of values from 0-255
         """
-        fourier = np.fft.fft2(arr)
-        fourier_shift = np.fft.fftshift(fourier)
-        fourier_mag = 20*np.log(np.abs(fourier_shift))
 
-        fourier_phase = np.angle(fourier)
-
+        fourier_mag, fourier_phase = FourierTransform(array)
         mag_rows, mag_columns = fourier_mag.shape
         phase_rows, phase_columns = fourier_phase.shape
         self.ImageMag.ShowArray(fourier_mag, 'gray', mag_columns, mag_rows, np.amin(fourier_mag), np.amax(fourier_mag))
