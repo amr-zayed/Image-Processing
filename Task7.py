@@ -1,5 +1,6 @@
 from PyQt5 import QtWidgets
 from numba.cuda.simulator import kernel
+from numpy.core.numeric import convolve
 from ImageDisplayerMatplot import ImageDisplay
 from Helpers import BrowseWidget, Convolotion, FourierTransform
 from PyQt5.QtGui import QDoubleValidator, QFont
@@ -53,7 +54,7 @@ class Task7(QtWidgets.QWidget):
 
         self.ApplyButton = QtWidgets.QPushButton('Apply filter')
         self.ApplyButton.setStyleSheet(PUSH_BUTTON_STYLE)
-        self.ApplyButton.clicked.connect(lambda: self.ApplyFilter())
+        self.ApplyButton.clicked.connect(lambda: self.SelectFilter())
         self.ApplyButton.setEnabled(False)
 
         self.Image = ImageDisplay()
@@ -68,13 +69,19 @@ class Task7(QtWidgets.QWidget):
         self.ImageDiffScrollArea = QtWidgets.QScrollArea()
         self.ImageDiffScrollArea.setWidget(self.ImageDiff)
 
+        self.FilterComboBox = QtWidgets.QComboBox()
+        self.FilterComboBox.addItems(['Box Filter', 'Sobel Filter'])
+        # self.FilterComboBox.activated[str].connect(self.SelectFilter)
+        self.FilterComboBox.setEnabled(False)
+
         self.layout_main.addWidget(self.BrowseWidget, 0, 0, 1, 4)
         self.layout_main.addWidget(self.size_label, 1, 0)
         self.layout_main.addWidget(self.size_text, 1, 1)
-        self.layout_main.addWidget(self.ApplyButton, 1, 2)
-        self.layout_main.addWidget(self.ImageScrollArea, 2, 0, 2, 3)
-        self.layout_main.addWidget(self.ImageFourierScrollArea, 1, 3, 2, 1)
-        self.layout_main.addWidget(self.ImageDiffScrollArea, 3, 3)
+        self.layout_main.addWidget(self.ApplyButton, 1, 2, 2,1)
+        self.layout_main.addWidget(self.FilterComboBox, 2, 0,1,2)
+        self.layout_main.addWidget(self.ImageScrollArea, 3, 0, 2, 3)
+        self.layout_main.addWidget(self.ImageFourierScrollArea, 1, 3, 3, 1)
+        self.layout_main.addWidget(self.ImageDiffScrollArea, 4, 3)
 
 
 
@@ -126,8 +133,9 @@ class Task7(QtWidgets.QWidget):
         self.Image.ShowArray(self.PixelsArray, 'gray', Columns, Rows, 0, 255)
         self.size_text.setEnabled(True)
         self.ApplyButton.setEnabled(True)
+        self.FilterComboBox.setEnabled(True)
 
-    def ApplyFilter(self):
+    def ApplyFilter(self, InputKernel=[]):
         if self.size_text.text() != '':
             temp = float(self.size_text.text())
             if temp%2 == 0:
@@ -148,31 +156,69 @@ class Task7(QtWidgets.QWidget):
             if columns%2==0:
                 self.PixelsArray = np.c_[self.PixelsArray, self.PixelsArray[:,columns-1]]
                 columns+=1
-            Kernel = np.ones((self.size, self.size))
+            if self.FilterComboBox.currentText() == 'Box Filter':
+                InputKernel = np.ones((self.size, self.size))
+                InputKernel = InputKernel/(self.size**2)
+
             Kernelpad = np.zeros((rows, columns))
 
             col_pad = (columns-self.size)//2
             row_pad = (rows-self.size)//2
             for i in range(row_pad, row_pad+self.size-1):
                 for j in range(col_pad, col_pad+self.size-1):
-                    Kernelpad[i][j] = 1/(self.size**2)
-            
+                    Kernelpad[i][j] = InputKernel[i-row_pad][j-col_pad]
             kernel_fourier = np.fft.fft2(Kernelpad)
             img_fourier = np.fft.fft2(self.PixelsArray)
             filteredimage = np.fft.ifft2(img_fourier*kernel_fourier)
             filteredimage = np.fft.ifftshift(filteredimage)
             filteredimage = np.abs(filteredimage)
-            img_rows, img_columns = filteredimage.shape
 
-            convolved_image = Convolotion(Kernel, self.PixelsArray, self.size)
-            
+            convolved_image = Convolotion(InputKernel, self.PixelsArray, self.size)            
 
-            diff_image = filteredimage-convolved_image
+            return convolved_image, filteredimage
 
-            self.ImageFourier.ShowArray(filteredimage, 'gray', img_columns, img_rows, 0, 255)
-            self.ImageDiff.ShowArray(diff_image, 'gray', img_columns, img_rows, 0, 255)
+    def SelectFilter(self):
+        text = self.FilterComboBox.currentText()
+        self.size = int(self.size_text.text())
+        if text == 'Box Filter':
+            conv_image, f_image = self.ApplyFilter()
+            rows, columns = f_image.shape
+            diff_image = f_image-conv_image
+            self.ImageFourier.ShowArray(f_image, 'gray', columns, rows, 0, 255)
+            self.ImageDiff.ShowArray(diff_image, 'gray', columns, rows, 0, 255)
+        else:
+            SobelFilter0 = self.custom_sobel(self.size, 0)
+            SobelFilter1 = self.custom_sobel(self.size, 1)
+            print(SobelFilter0)
+            print(SobelFilter1)
+            conv_image0, f_image0 = self.ApplyFilter(SobelFilter0)
+            conv_image1, f_image1 = self.ApplyFilter(SobelFilter1)
+            f_image = np.sqrt(f_image0**2+f_image1**2)
+            conv_image = np.sqrt(conv_image0**2+conv_image1**2)
+            rows, columns = f_image.shape
+            self.ImageFourier.ShowArray(f_image, 'gray', columns, rows, np.amin(f_image), np.amax(f_image))
+            # self.ImageDiff.ShowArray(conv_image, 'gray', columns, rows, np.amin(conv_image), np.amax(conv_image))
+            diff_imge = f_image - conv_image
+            self.ImageDiff.ShowArray(diff_imge, 'gray', columns, rows, 0, 255)
 
 
+    def custom_sobel(self, shape, axis):
+        k = np.zeros((shape, shape))
+        p=[]
+        for j in range(shape):
+            for i in range(shape):
+                if not (i == (shape -1)/2. and j == (shape -1)/2.):
+                    p.append((j,i))
+        k=np.zeros((shape, shape))
+        for j, i in p:
+            j_ = int(j - (shape -1)/2.)
+            i_ = int(i - (shape -1)/2.)
+            if axis==0:
+                k[j,i] = i_/float(i_*i_ + j_*j_)
+            else:
+                k[j,i] = j_/float(i_*i_ + j_*j_)
+        return k
+    
     def DeleteWidget(self):
         """Deletes the widget and it's components
         """
@@ -187,6 +233,9 @@ class Task7(QtWidgets.QWidget):
 
         self.ImageFourierScrollArea.deleteLater()
         self.ImageFourier.deleteLater()
+
         self.size_label.deleteLater()
         self.size_text.deleteLater()
         self.ApplyButton.deleteLater()
+
+        self.FilterComboBox.deleteLater()

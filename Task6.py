@@ -1,11 +1,33 @@
 from PyQt5 import QtWidgets
 from ImageDisplayerMatplot import ImageDisplay
 from Helpers import BrowseWidget, FourierTransform
+from PyQt5.QtGui import QIntValidator, QFont
 
 import os
 import numpy as np
 
+TEXT_COLOR = "color: #BCBCBC;"
 
+PUSH_BUTTON_STYLE = """QPushButton {
+    color: #BCBCBC;
+    background: #0F62FE;
+    border-width: 0px;
+    border-color: yellow;
+    border-style: solid;
+    border-radius: 10px;
+    min-width: 3em;
+    min-height: 30px;
+    padding: 6px;}
+    
+    QPushButton:hover {
+background-color: #c2c2c2;
+color: black;
+}
+    QPushButton:pressed {
+background-color: #FFFFFF;
+color: black;
+}
+"""
 class Task6(QtWidgets.QWidget):
     def __init__(self, parent=None):
         QtWidgets.QWidget.__init__(self, parent=parent)
@@ -28,13 +50,29 @@ class Task6(QtWidgets.QWidget):
         self.ImageMag = ImageDisplay()
         self.MagScrollArea = QtWidgets.QScrollArea()
         self.MagScrollArea.setWidget(self.ImageMag)
+        
+        self.freq_label = QtWidgets.QLabel('Enter Frequency: ')
+        self.freq_label.setFont(QFont('impact', 15))
+        self.freq_label.setStyleSheet(TEXT_COLOR)
+        self.Frequency = -1
 
+        self.freq_text = QtWidgets.QLineEdit()
+        self.freq_text.setValidator(QIntValidator())
+        self.freq_text.setEnabled(False)
+        self.freq_text.setStyleSheet("color: #BCBCBC;")
 
+        self.ApplyButton = QtWidgets.QPushButton('Remove freq')
+        self.ApplyButton.setStyleSheet(PUSH_BUTTON_STYLE)
+        self.ApplyButton.clicked.connect(lambda: self.RemoveFreq())
+        self.ApplyButton.setEnabled(False)
 
-        self.layout_main.addWidget(self.BrowseWidget, 0, 0, 1, 2)
-        self.layout_main.addWidget(self.ImageScrollArea, 1,0,2,1)
-        self.layout_main.addWidget(self.MagScrollArea, 1,1)
-        self.layout_main.addWidget(self.PhaseScrollArea, 2,1)
+        self.layout_main.addWidget(self.BrowseWidget, 0, 0, 1,5)
+        self.layout_main.addWidget(self.freq_label, 1,0)
+        self.layout_main.addWidget(self.freq_text, 1,2)
+        self.layout_main.addWidget(self.ApplyButton, 1,3)
+        self.layout_main.addWidget(self.ImageScrollArea, 2,0,2,4)
+        self.layout_main.addWidget(self.MagScrollArea, 1,4,2,1)
+        self.layout_main.addWidget(self.PhaseScrollArea, 3,4)
 
         self.PixelsArray = None
 
@@ -83,6 +121,8 @@ class Task6(QtWidgets.QWidget):
 
         self.Image.ShowArray(self.PixelsArray, 'gray', Columns, Rows, intensity_min, intensity_max)
         self.Transform(self.PixelsArray)
+        self.freq_text.setEnabled(True)
+        self.ApplyButton.setEnabled(True)
         
     def Transform(self, array):
         """Generates the fourier magnitude and phase of the
@@ -95,8 +135,12 @@ class Task6(QtWidgets.QWidget):
         fourier_mag, fourier_phase = FourierTransform(array)
         mag_rows, mag_columns = fourier_mag.shape
         phase_rows, phase_columns = fourier_phase.shape
+        print(fourier_mag)
         self.ImageMag.ShowArray(fourier_mag, 'gray', mag_columns, mag_rows, np.amin(fourier_mag), np.amax(fourier_mag))
         self.ImagePhase.ShowArray(fourier_phase, 'gray', phase_columns, phase_rows, np.amin(fourier_phase), np.amax(fourier_phase))
+
+    def RemoveFreq(self):
+        pass
 
     def DeleteWidget(self):
         """Deletes the widget and it's components
@@ -110,5 +154,8 @@ class Task6(QtWidgets.QWidget):
         self.ImagePhase.deleteLater()
         self.PhaseScrollArea.deleteLater()
 
+        self.freq_text.deleteLater()
+        self.freq_label.deleteLater()
+        self.ApplyButton.deleteLater()
         self.ImageMag.deleteLater()
         self.MagScrollArea.deleteLater()

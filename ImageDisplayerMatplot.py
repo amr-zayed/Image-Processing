@@ -1,4 +1,4 @@
-from PyQt5 import QtWidgets
+from PyQt5 import QtWidgets, QtGui
 from PyQt5.QtWidgets import QWidget
 import pydicom as dicom
 from os import stat
@@ -16,6 +16,8 @@ class MplCanvas(FigureCanvasQTAgg):
         self.figure.subplots_adjust(bottom=0, top=1, left=0, right=1)
         self.axes.axis('off')
         super(MplCanvas, self).__init__(self.figure)
+    def mousePressEvent(self, event):
+        return (event.x(), event.y())
 
 
 

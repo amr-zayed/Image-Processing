@@ -115,7 +115,7 @@ class Task4(QtWidgets.QWidget):
         Values = list(zip(*list(histo.values())))[0]
         if IsEqualized:
             self.HistogramEqualized.PltHistogram(Intensities, Values)
-        else: 
+        else:
             self.HistogramImage.PltHistogram(Intensities, Values)
 
     def HistoEqualization(self):

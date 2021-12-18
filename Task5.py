@@ -152,6 +152,7 @@ class Task5(QtWidgets.QWidget):
             self.factor = int(self.factor_text.text())
         
         Kernel = np.ones((self.size, self.size))
+        Kernel = Kernel/(self.size**2)
         convolved_image = Convolotion(Kernel, self.PixelsArray, self.size)
         temp_image = (self.PixelsArray - convolved_image)*self.factor
         temp_image = self.PixelsArray + temp_image

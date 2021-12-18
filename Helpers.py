@@ -81,12 +81,12 @@ def Convolotion(arr1, arr2, k_size):
             for Ki in range(k_size):
                 for Kj in range(k_size):
                     pixels_avg = pixels_avg +  convolved_list[row][column]*arr1[Ki][Kj]
-                    row+=1
                     column+=1
-                row = i - padding
+                row+=1
+                # row = i - padding
                 column = j - padding
                 
-            pixels_avg = pixels_avg/(k_size*k_size)
+            # pixels_avg = pixels_avg/(k_size*k_size)
             convolved_list[i][j]= pixels_avg
     convolved_list = convolved_list[padding:Rows,padding:Columns]
     return convolved_list
