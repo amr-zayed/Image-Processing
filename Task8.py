@@ -1,8 +1,9 @@
+import math
 from PyQt5 import QtWidgets
 from PyQt5.QtGui import QFont
 from numpy.core.fromnumeric import amax, amin
 from ImageDisplayerMatplot import ImageDisplay
-from math import sqrt
+from math import pi, sqrt
 
 import os
 import numpy as np
@@ -60,7 +61,7 @@ class Task8(QtWidgets.QWidget):
         self.CroppedImage = ImageDisplay()
 
         self.NoiseComboBox = QtWidgets.QComboBox()
-        self.NoiseComboBox.addItems(['Gaussian', 'Uniform'])
+        self.NoiseComboBox.addItems(['Gaussian', 'Uniform', 'Salt and pepper', 'Periodic'])
         self.NoiseComboBox.activated[str].connect(self.select_noise)
 
         self.MainImage = None
@@ -96,7 +97,6 @@ class Task8(QtWidgets.QWidget):
             y=0
         self.MouseControlls.append([x, y])
         self.MouseControlls = np.array(self.MouseControlls)
-        print(self.MouseControlls)
         try:
             if self.MouseControlls[0][0]==self.MouseControlls[1][0] or self.MouseControlls[0][1]==self.MouseControlls[1][1]:
                 self.MouseControlls = []
@@ -122,8 +122,13 @@ class Task8(QtWidgets.QWidget):
         noise = None
         if text =='Gaussian':
             noise = self.gaussian_noise(self.MainImage, 0, 5)
-        else:
+        elif text =='Uniform':
             noise =self.uniform_noise(self.MainImage, -10, 10)
+        elif text == 'Salt and pepper':
+            noise = self.salt_pepper_noise(self.MainImage, 15, 70)
+        elif text == 'Periodic':
+            noise = self.periodic_noise(self.MainImage, 100, pi/2, 0)
+
         rows, columns = noise.shape
         for i in range(rows):
             for j in range(columns):
@@ -143,6 +148,24 @@ class Task8(QtWidgets.QWidget):
         noise = np.random.uniform(low=a, high=b, size=image.shape)
         # noise = self.normalize(noise)
         noisy_image = np.add(image, noise)
+        noisy_image = self.normalize(noisy_image)
+        return noisy_image
+    
+    def salt_pepper_noise(self, image, salt_percent, original_percent):
+        pepper_percent = 100-(salt_percent+original_percent)
+        percentile_arr=np.random.rand(image.shape[0], image.shape[1])
+        salt_index = np.where(percentile_arr<(pepper_percent+salt_percent)/100)
+        pepper_index = np.where(percentile_arr<(pepper_percent/100))
+        noisy_image = image.copy()
+        noisy_image[salt_index] = 255
+        noisy_image[pepper_index] = 0
+        return noisy_image
+    
+    def periodic_noise(self, image, amp, r, theta):
+        rows, columns = image.shape
+        x, y = np.meshgrid(range(0,rows), range(0,columns))
+        noise = amp*np.abs(np.sin(r*math.cos(theta*pi/180)*x+r*math.sin(theta*pi/180)*y))
+        noisy_image = np.add(noise, image)
         noisy_image = self.normalize(noisy_image)
         return noisy_image
 

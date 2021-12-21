@@ -167,11 +167,11 @@ Body Part Examined: {}".format(self.DicomInfo['PatientName'],
     def PltHistogram(self, keys, values):
         self.ImageDisplayer.axes.clear()
         self.ImageDisplayer.axes.bar(keys, values)
+        self.ImageDisplayer.figure.subplots_adjust(bottom=0.1, top=1, left=0.1, right=1)
         if self.height()==720:
             self.setFixedHeight(721)
         else:
             self.setFixedHeight(720)
-        self.ImageDisplayer.axes.axis('on')
 
 
     def DisplayError(self, title, Message):
