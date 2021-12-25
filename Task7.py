@@ -189,8 +189,6 @@ class Task7(QtWidgets.QWidget):
         else:
             SobelFilter0 = self.custom_sobel(self.size, 0)
             SobelFilter1 = self.custom_sobel(self.size, 1)
-            print(SobelFilter0)
-            print(SobelFilter1)
             conv_image0, f_image0 = self.ApplyFilter(SobelFilter0)
             conv_image1, f_image1 = self.ApplyFilter(SobelFilter1)
             f_image = np.sqrt(f_image0**2+f_image1**2)

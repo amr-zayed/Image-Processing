@@ -162,12 +162,10 @@ class Task3(QWidget):
         
         start = timer()
         self.NearestArray, width, height = self.NearestNeighborZoom(self.MainArray, self.ZoomFactor)
-        print('finished nearest neighbor: ', timer()-start)
         self.ImageNearest.ShowArray(self.NearestArray, color='gray', width= width, height= height)
 
         start = timer()
         self.LinearArray, width, height = self.LinearInterpZoom(self.MainArray, self.ZoomFactor)
-        print('finished linear interpolation: ', timer()-start)
         self.ImageLinear.ShowArray(self.LinearArray, color='gray', width= width, height= height)
         self.number_button.setEnabled(True)
 

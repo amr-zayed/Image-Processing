@@ -135,7 +135,6 @@ class Task6(QtWidgets.QWidget):
         fourier_mag, fourier_phase = FourierTransform(array)
         mag_rows, mag_columns = fourier_mag.shape
         phase_rows, phase_columns = fourier_phase.shape
-        print(fourier_mag)
         self.ImageMag.ShowArray(fourier_mag, 'gray', mag_columns, mag_rows, np.amin(fourier_mag), np.amax(fourier_mag))
         self.ImagePhase.ShowArray(fourier_phase, 'gray', phase_columns, phase_rows, np.amin(fourier_phase), np.amax(fourier_phase))
 

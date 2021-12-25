@@ -8,8 +8,10 @@ from Task5 import Task5
 from Task6 import Task6
 from Task7 import Task7
 from Task8 import Task8
+from Task9 import Task9
+from Task10 import Task10
 
-NO_OF_TASKS = 8
+NO_OF_TASKS = 10
 TEXT_COLOR = "color: #BCBCBC;"
 
 PUSH_BUTTON_STYLE = """QPushButton {
@@ -170,6 +172,12 @@ class ApplicationWindow(QtWidgets.QMainWindow):
             self.layout_Task.addWidget(self.OpenedTask)
         elif index==7:
             self.OpenedTask = Task8()
+            self.layout_Task.addWidget(self.OpenedTask)
+        elif index==8:
+            self.OpenedTask = Task9()
+            self.layout_Task.addWidget(self.OpenedTask)
+        elif index==9:
+            self.OpenedTask = Task10()
             self.layout_Task.addWidget(self.OpenedTask)
     
     def InitialLabel(self):

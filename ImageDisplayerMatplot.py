@@ -5,6 +5,7 @@ from os import stat
 from PIL.Image import open
 import numpy as np
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg
+import matplotlib.pyplot as plt
 from matplotlib.figure import Figure
 from numba import jit
 
@@ -16,8 +17,7 @@ class MplCanvas(FigureCanvasQTAgg):
         self.figure.subplots_adjust(bottom=0, top=1, left=0, right=1)
         self.axes.axis('off')
         super(MplCanvas, self).__init__(self.figure)
-    def mousePressEvent(self, event):
-        return (event.x(), event.y())
+
 
 
 
@@ -139,7 +139,7 @@ Body Part Examined: {}".format(self.DicomInfo['PatientName'],
 
         return MainData
 
-    def ShowArray(self, Array, color= None, width=None, height=None, VMin = None, VMax = None):
+    def ShowArray(self, Array, color= plt.cm.Greys_r, width=None, height=None, VMin = None, VMax = None, aspect=False):
         """Creates a Qpixmap from an array
 
         Args:
@@ -147,7 +147,10 @@ Body Part Examined: {}".format(self.DicomInfo['PatientName'],
             color (str): Color Template
         """
         self.ImageDisplayer.axes.clear()
-        self.ImageDisplayer.axes.imshow(Array, cmap=color, vmin = VMin, vmax = VMax)
+        if aspect:
+            self.ImageDisplayer.axes.imshow(Array, cmap=color, vmin = VMin, vmax = VMax, extent=[0,width,0,height])
+        else:
+            self.ImageDisplayer.axes.imshow(Array, cmap=color, vmin = VMin, vmax = VMax)
         if width != None and height!= None:
             if self.height()==height and self.width()==width:
                 self.setFixedWidth(width+1)
