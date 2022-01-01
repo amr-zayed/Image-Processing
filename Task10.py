@@ -33,38 +33,39 @@ class Task10(QtWidgets.QWidget):
         x1, y1, x2, y2 = round(x1), round(y1), round(x2), round(y2)
         if abs(x1-x2)<25 or abs(y1-y2)<25:
             self.Image.DisplayError('size error', 'selected area can not have a lemgth or width less than 25')
-        rows, columns = self.PixelsArray.shape
-        selected_area = self.PixelsArray[min(y1, y2):max(y1, y2), min(x1, x2):max(x1, x2)]
-        selected_area, row_count, col_count = self.to_odd_image(selected_area)
+        # selected_area = self.variance[min(y1, y2):max(y1, y2), min(x1, x2):max(x1, x2)]
+        # selected_area, row_count, col_count = self.to_odd_image(selected_area)
 
-        kernel = np.full((25, 25), 1/(25**2))
-        rows, columns = selected_area.shape
-        row_pad = (rows-25)//2
-        column_pad = (columns-25)//2
-        kernel = np.pad(kernel, [(row_pad, row_pad), (column_pad, column_pad)], 'constant')
+        # kernel = np.full((25, 25), 1/(25**2))
+        # rows, columns = selected_area.shape
+        # row_pad = (rows-25)//2
+        # column_pad = (columns-25)//2
+        # kernel = np.pad(kernel, [(row_pad, row_pad), (column_pad, column_pad)], 'constant')
         
-        image_fourier = np.fft.fft2(selected_area)
-        image_fourier2 = np.fft.fft2(selected_area**2)
-        kernel_fourier = np.fft.fft2(kernel)
-        avg_X = np.fft.ifft2(kernel_fourier*image_fourier)
-        avg_X2 = np.fft.ifft2(kernel_fourier*image_fourier2)
+        # image_fourier = np.fft.fft2(selected_area)
+        # image_fourier2 = np.fft.fft2(selected_area**2)
+        # kernel_fourier = np.fft.fft2(kernel)
+        # avg_X = np.fft.ifft2(kernel_fourier*image_fourier)
+        # avg_X2 = np.fft.ifft2(kernel_fourier*image_fourier2)
         
-        variance = avg_X2-avg_X**2
-        variance = np.abs(variance)
-        norm = plt.Normalize(amin(variance), amax(variance))
-        variance = cm.jet(norm(variance))
-        variance = variance[:,:,:3]
+        # variance = avg_X2-avg_X**2
+        # variance = np.abs(variance)
+        # norm = plt.Normalize(amin(variance), amax(variance))
+        # variance = cm.jet(norm(variance))
+        # variance = variance[:,:,:3]
         array_variance = self.PixelsArray.copy()
         array_variance = np.stack((array_variance,)*3, axis=-1)
         array_variance = self.NormalizeData(array_variance)
         
-        array_variance[min(y1, y2):max(y1, y2)+col_count, min(x1, x2):max(x1, x2)+row_count] = variance
+        # array_variance[min(y1, y2):max(y1, y2)+col_count, min(x1, x2):max(x1, x2)+row_count] = self.variance[min(y1, y2):max(y1, y2), min(x1, x2):max(x1, x2)]
+        array_variance[min(y1, y2):max(y1, y2), min(x1, x2):max(x1, x2)] = self.variance[min(y1, y2):max(y1, y2), min(x1, x2):max(x1, x2)]
         self.Image.ImageDisplayer.axes.imshow(array_variance)
     
     def NormalizeData(self, data):
         return (data - np.min(data)) / (np.max(data) - np.min(data))
 
     def to_odd_image(self, image):
+        print(image.shape)
         rows, columns = image.shape
         row_count = 0
         column_count=0
@@ -116,6 +117,27 @@ class Task10(QtWidgets.QWidget):
         self.Image.ShowArray(self.PixelsArray, width = Columns, height=Rows)
         self.rs = RectangleSelector(self.Image.ImageDisplayer.axes, self.line_select_callback,
         drawtype = 'box', useblit=False, button=[1], minspanx=5, minspany=5, spancoords='pixels', interactive=False)
+        self.calc_variance(self.PixelsArray)
+    
+    def calc_variance(self, image):
+        kernel = np.full((25, 25), 1/(25**2))
+        rows, columns = image.shape
+        row_pad = (rows-25)//2
+        column_pad = (columns-25)//2
+        kernel = np.pad(kernel, [(row_pad, row_pad), (column_pad, column_pad)], 'constant')
+        
+        image_fourier = np.fft.fft2(image)
+        image_fourier2 = np.fft.fft2(image**2)
+        kernel_fourier = np.fft.fft2(kernel)
+        avg_X = np.fft.ifft2(kernel_fourier*image_fourier)
+        avg_X = np.fft.ifftshift(avg_X)
+        avg_X2 = np.fft.ifft2(kernel_fourier*image_fourier2)
+        avg_X2 = np.fft.ifftshift(avg_X2)
+        self.variance = avg_X2-avg_X**2
+        self.variance = np.abs(self.variance)
+        norm = plt.Normalize(amin(self.variance), amax(self.variance))
+        self.variance = cm.jet(norm(self.variance))
+        self.variance = self.variance[:,:,:3]
 
     def DeleteWidget(self):
         """Deletes the widget and it's components

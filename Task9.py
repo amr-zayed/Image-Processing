@@ -55,7 +55,7 @@ class Task9(QtWidgets.QWidget):
         self.max_text.setStyleSheet("color: #BCBCBC;")
 
         self.FilterComboBox = QtWidgets.QComboBox()
-        self.FilterComboBox.addItems(['No filter', 'Ram-Lak filter', 'Hamming filter'])
+        self.FilterComboBox.addItems(['No filter', 'Ram-Lak filter', 'Hamming filter', 'Special Case'])
 
         self.ApplyButton = QtWidgets.QPushButton('Apply filter')
         self.ApplyButton.setStyleSheet(PUSH_BUTTON_STYLE)
@@ -128,6 +128,19 @@ class Task9(QtWidgets.QWidget):
             filter = 'ramp'
         elif self.FilterComboBox.currentText() == 'Hamming filter':
             filter = 'hamming'
+        elif self.FilterComboBox.currentText() == 'Special Case':
+            theta = [0, 20, 40, 60, 160]
+            filter = None
+            sinogram = self.CreateSinogram(theta=theta)
+            reconstruction_fbp = iradon(sinogram, theta=theta, filter_name=filter)
+            rows, columns = reconstruction_fbp.shape
+            self.laminogram_display.ShowArray(reconstruction_fbp, width=columns, height=rows)
+            return
+
+        if self.step==0:
+            self.sinogram_display.DisplayError('zero division', 'step should be greater than 0')
+            return
+
 
         theta = np.linspace(0., self.max, self.max//self.step, endpoint=True)
         sinogram = self.CreateSinogram(theta=theta)
